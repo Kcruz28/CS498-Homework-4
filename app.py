@@ -27,13 +27,18 @@ print(df)
 @app.route('/results', methods=['POST'])
 def get_results():
     input_json = request.get_json()
-    term = input_json.get("term")
-    filtered_df = df.loc[df['term'] == term, ["url", "clicks"]]
-    sorted_df = filtered_df.sort_values(by=["clicks", "url"], ascending=[False, True])
-    sorted_df['domain_type'] = sorted_df['url'].apply(lambda x: x.split('.')[-1])
-    sorted_df = sorted_df.sort_values(by=["clicks", "domain_type"], ascending=[False, True])
-    sorted_df = sorted_df.drop(columns=['domain_type'])
-    result_dict = sorted_df.set_index('url')['clicks'].to_dict()
+    term = input_json.get("term", "").strip()
+    filtered_df = df.loc[df["term"] == term, ["url", "clicks"]].copy()
+    filtered_df["domain_type"] = filtered_df["url"].apply(lambda x: x.split(".")[-1])
+    domain_priority = {"org": 0, "edu": 1, "com": 2}
+    filtered_df["domain_rank"] = (
+        filtered_df["domain_type"].map(domain_priority).fillna(3)
+    )
+    sorted_df = filtered_df.sort_values(
+        by=["clicks", "domain_rank", "url"], ascending=[False, True, True]
+    )
+    sorted_df = sorted_df.drop(columns=["domain_type", "domain_rank"])
+    result_dict = sorted_df.set_index("url")["clicks"].to_dict()
     return jsonify({"results": result_dict})
 
 
