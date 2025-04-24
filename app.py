@@ -19,6 +19,9 @@ for file in files:
 
 df = pd.concat(dataframes, ignore_index=True)
 
+df["url"] = df["url"].str.strip().str.lower()
+df["term"] = df["term"].str.strip()
+
 print(df)
 
 @app.route('/results', methods=['POST'])
@@ -47,7 +50,7 @@ def get_popularity():
     input_json = request.get_json()
     url = input_json.get("url")
     total_count = df.loc[df['url'] == url, "clicks"].sum()
-    return jsonify({"clicks": total_count})
+    return jsonify({"clicks": int(total_count)})
 
 
 @app.route('/getBestTerms', methods=['POST'])
@@ -62,4 +65,4 @@ def get_best_terms():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)
