@@ -54,14 +54,14 @@ def get_popularity():
     return jsonify({"clicks": int(total_count)})
 
 
-@app.route('/getBestTerms', methods=['POST'])
+@app.route("/getBestTerms", methods=["POST"])
 def get_best_terms():
-    input_json = request.get_json()
-    website = input_json.get("website")
-    total_clicks = df.loc[df['url'] == website, "clicks"].sum()
-    best = df.loc[df['url'] == website, ["term", "clicks"]]
-    best = best[best['clicks'] > 0.05 * total_clicks]
-    best_terms = best['term'].unique().tolist()
+    data = request.get_json()
+    website = data.get("website")
+    df_site = df[df["url"] == website]
+    total_clicks = df_site["clicks"].sum()
+    best = df_site[df_site["clicks"] > 0.05 * total_clicks]
+    best_terms = sorted(best["term"].unique().tolist())
     return jsonify({"best_terms": best_terms})
 
 
