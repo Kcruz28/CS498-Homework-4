@@ -6,6 +6,7 @@ import pandas as pd
 
 
 app = Flask(__name__)
+app.json.sort_keys = False
 
 
 dir_ = "processed_data"  
